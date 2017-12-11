@@ -7,7 +7,7 @@
     	Dear {{$CustomerName}},<br>
 <br />
 <p>
-Thanks for using poyalty. You have {{$TransType}} {{$Cashpoints}} at the restaurant below and your <br /> current balance is {{$BalanceCashpoints}}.</p><br />
+Thanks for using poyalty. You have accrued {{$accrued_points}} cashpoints and redeemed  {{$redeem_amount}} cashpoints at the restaurant below and your <br /> current balance is {{$BalanceCashpoints}}.</p><br />
 Restaurant  : {{$MerchantName}}<br />
 Address     : {{$MerchantAddress}} .<br/>
 Date        : {{date("M d,Y")}}<br />

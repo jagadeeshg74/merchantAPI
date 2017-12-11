@@ -9,18 +9,18 @@ use App\Models\MerchantPoyalty ;
 use Response;
 use Log;  
 use Exception;
+use DB;
 
 use Mail;
 
 class UsersController extends Controller
-{
+ {
     //
 
 		public function __Construct(){
 
 			
 		}
-
 
 
 function authenticate(Request $request) {
@@ -64,7 +64,7 @@ try{
         }
         catch(Exception $err) {
           // Fail Response
-				return Response::json(array('success' => false , 'msg'=>$e->getMessage()));
+				return Response::json(array('success' => false , 'msg'=>$err->getMessage()));
         }
     }
 	
@@ -77,18 +77,23 @@ try{
 
 try{     
 
+       Log::info("user id : ".$username); 
+
+
+     //   DB::enableQueryLog();
         // check email id exists
-        $user = User::with('Merchant')
-                    ->where([
-                 ['ur_user_email',$username ]
+        $user = User::where([
+                 ['ur_user_login_id',$username ]
                        ])
                 ->get()->first();
 
         // if exists  reset password 
 
+      //  Log::info(DB::getQueryLog()); 
+
          if (is_null($user))
                 {
-                 return Response::json(array('success' => false ,'msg'=>'Email Id :'.$username.' does not exists , Please contact administrator !'));
+                 return Response::json(array('success' => false ,'msg'=>'User Id :'.$username.' does not exists , Please contact administrator !'));
                 }
                 else {
                         $user['ur_user_password'] = 'welcome123';
@@ -156,7 +161,6 @@ try{
 
 
 	/*
-
 function valiate(username, password) {
     var deferred = Q.defer();
 

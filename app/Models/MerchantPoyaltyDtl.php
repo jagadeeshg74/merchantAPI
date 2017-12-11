@@ -17,6 +17,7 @@ class MerchantPoyaltyDtl extends Model
         'pd_cust_id' ,
         'pd_merchant_id',
         'pd_card_id',
+        'pd_nom_id',
         'pd_transaction_id',
         'pd_transaction_type',
         'pd_poyals_added',

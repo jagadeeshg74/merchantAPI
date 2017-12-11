@@ -3,49 +3,55 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Reminders\RemindableTrait;
+use Illuminate\Auth\Reminders\RemindableInterface;
 
 use App\Models\Customer;
 use Log; 
 
 
-class MerchantPoyalty extends Model
-{
-    //
+class NOMPoyalty extends Model  {
 
-	protected $table ='pty_cust_poyalty_card_merchant_hdr';
 	
 
-	protected $primaryKey = ['mp_merchant_id', 'mp_cust_id','mp_nom_id','mp_card_id' ];
+    //pty_cust_poyalty_card_nom_hdr
 
-	 public  $timestamps = false;
-	 public  $incrementing = false;
+	protected $table ='pty_cust_poyalty_card_nom_hdr';
+	
+
+	//protected $primaryKey = array('nr_cust_id','nr_nom_id','nr_card_id');
+	 
+
+
+	 protected $primaryKey = ['nr_cust_id', 'nr_nom_id','nr_card_id'];
+     public $incrementing = false;
+     public  $timestamps =false;
 
     protected $fillable = [
-		//'mp_id'  ,
-		'mp_cust_id' ,  
-		'mp_merchant_id' , 
-		'mp_nom_id' ,
-		'mp_card_id' ,
-		'mp_poyals_accrued' ,  
-		'mp_poyals_redeemed'  ,
-		'mp_poyals_expired',
-		'mp_poyals_balance',
-		'mp_record_status',
-		'mp_create_date',
-		'mp_update_date',
-		'mp_update_time'
+		// 'nr_id'  ,
+		'nr_cust_id' ,  
+		'nr_nom_id' , 
+		'nr_card_id' ,
+		'nr_poyals_accrued' ,  
+		'nr_poyals_redeemed'  ,
+		'nr_poyals_expired',
+		'nr_poyals_balance',
+		'nr_record_status',
+		'nr_create_date',
+		'nr_create_time',
+		'nr_update_date',
+		'nr_update_time'
         
     ];
 
- 
-
- public function customer()
+  public function customer()
     {
         return $this->hasOne('App\Models\Customer','cm_cust_id');
     }
 
+ 
 
-   /**
+/**
  * Set the keys for a save update query.
  *
  * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -83,6 +89,7 @@ protected function getKeyForSaveQuery($keyName = null)
 
     return $this->getAttribute($keyName);
 }
+
 
 
 

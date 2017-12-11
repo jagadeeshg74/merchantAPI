@@ -11,7 +11,7 @@ use App\Models\Customer ;
 use App\Models\PoyaltyCard;
 
 use Response;
-use Log;  
+use Log;
 use Exception;
 
 use Illuminate\Support\Facades\DB;
@@ -41,7 +41,6 @@ class CashpointsController extends Controller
 	 {
 
 	 	
-
 
     }
         /***
@@ -243,8 +242,7 @@ else {
 
 
 switch ($report_type) {
-    case REPORT_DAILY : $cashpoints_daily = $this-> getDailyReport($merchant_id ,$report_date);
-       
+    case REPORT_DAILY : $cashpoints_daily = $this-> getDailyReport($merchant_id ,$report_date);      
         break;
     case REPORT_MONTHLY:
          Log::info ('Running Monthly report for    : ' .  $merchant_id .'------' .$report_date->format('Y-m-d H:i:s'));  

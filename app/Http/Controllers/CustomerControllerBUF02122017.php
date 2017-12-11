@@ -11,17 +11,11 @@ use App\Models\Customer ;
 use App\Models\PoyaltyCard;
 use App\Models\NOMPoyalty ;
 
-use Exception;
-
 use Response;
 use Log;  
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
-
-define("A",  20, true);
-define("B",  40, true); 
-define("C", 100, true);
 
 class CustomerController extends Controller
 {
@@ -47,11 +41,16 @@ class CustomerController extends Controller
 		 public function store(Request $request)
 	 {
 
+	 	
+
 
     }
         /***
             find customers based on mobile nos
+
+
         ****/
+
 
      public function show($mobile_no ,$merchant_id)
     {
@@ -60,20 +59,19 @@ class CustomerController extends Controller
     
       Log::info('Input merchant_id' . $merchant_id);
 
-      try {
-
-        $customer =  Customer::with('PoyaltyCard')
+        $customer=  Customer::with('PoyaltyCard')
                     ->where('cm_mobile_no',$mobile_no)
                     ->with(['MerchantPoyalty' => function ($query) use ($merchant_id){
                       $query->where('mp_merchant_id',$merchant_id); 
-                    }])
+
+            }])
                     ->get()->first();
 
           Log::info(DB::getQueryLog());             
 
          if (is_null($customer) )
          {
-            return Response::json(array('success' => false ,'msg' =>"Customer mobile no :". $mobile_no." not found"));
+            return Response::json({$customer})  ;
 
          }
          
@@ -86,7 +84,7 @@ class CustomerController extends Controller
         if (is_null($NOMDetail)){
 
               Log::info('Merchant does not valid NOM details.');
-          //    throw new Exception( 'Merchant does not have valid NOM agreement set-up');
+              throw new Exception( 'Merchant does not have valid NOM agreement set-up');
 
         }else {
 
@@ -95,19 +93,19 @@ class CustomerController extends Controller
                 $this->nom_id =  $WorkingArray["mo_nom_id"] ;
                 Log::info('Merchant NOM ID .'. $this->nom_id);
 
+
                 // NOM header details
                 $NOMHdr =  DB::table('pty_NOM_hdr')
                       ->where( 'no_nom_id' , '=',$this->nom_id )
                       ->get()->first();
 
-               $WorkingNOMHdr = json_decode(json_encode($NOMHdr),true);
-               $this->accruel_mul  = $this -> getAcruelRatio($WorkingNOMHdr["no_accrual_ratio"]);
+               // $WorkingNOMHdr = json_decode(json_encode($NOMHdr),true);
+              //  $this->accruel_mul  = $this -> getAcruelRatio($WorkingNOMHdr["no_accrual_ratio"]);
 
                         
-          
-          }
+         }
 
-             //   $customer =Response::json( $customer);    
+           //    $customer =Response::json( $customer);    
              //  $data = $customer->getData();
 
             //   $decodedValue=json_encode($data);
@@ -120,6 +118,8 @@ class CustomerController extends Controller
 
 
                $this -> cust_id = $WorkingArray['cm_cust_id'];
+
+
                $cust_nom_hdr= NOMPoyalty::where(
                             [
                               ['nr_cust_id',$this->cust_id],
@@ -128,15 +128,11 @@ class CustomerController extends Controller
 
                              ])->get()->first();
 
+
                 $WorkingCustNOM = json_decode(json_encode($cust_nom_hdr),true);
 
-                if (is_null($cust_nom_hdr)){
-                  $customer['nom_poyalty'] = array("poyals_balance"=> 0 );
-                }
-                  else{
-                $customer['nom_poyalty'] = array("poyals_balance"=>$WorkingCustNOM['nr_poyals_balance'],
-                  "nom_accruel_factor" => $this->accruel_mul );
-              }
+                $customer['nom_poyalty'] = $WorkingCustNOM['nr_poyals_balance'];
+
 
          Log::info('Visits ----------' . $WorkingArray['merchant_poyalty']['mp_merchant_id']);
      //  Log::info('Visits ----------'. $data['merchant_poyalty']['mp_merchant_id']); 
@@ -238,13 +234,13 @@ class CustomerController extends Controller
         $cusine_collection = DB::table('pty_cust_merchant_bill')
                    
                 ->join('pty_merchant_type_xref','pty_cust_merchant_bill.mb_merchant_id', '=', 'pty_merchant_type_xref.mf_merchant_id')
-                ->join('pty_merchant_sub_type_master', 'pty_merchant_type_xref.mf_merchant_sub_type', '=', 'pty_merchant_sub_type_master.me_merchant_type_id')
+                ->join('pty_merchant_type_master', 'pty_merchant_type_xref.mf_merchant_sub_type', '=', 'pty_merchant_type_master.me_merchant_type_id')
                 ->where([
                         ['mb_cust_id', '=', $WorkingArray['cm_cust_id']],
                         ['mb_merchant_id' ,'=',$WorkingArray['merchant_poyalty']['mp_merchant_id']]
                       ])
                 ->distinct()         
-                ->select('pty_merchant_type_xref.mf_merchant_sub_type','pty_cust_merchant_bill.mb_cust_id' , 'pty_merchant_sub_type_master.me_merchant_sub_type')       
+                ->select('pty_merchant_type_xref.mf_merchant_sub_type','pty_cust_merchant_bill.mb_cust_id' , 'pty_merchant_type_master.me_merchant_sub_type')       
                 ->get();
 
 
@@ -297,17 +293,7 @@ class CustomerController extends Controller
 
           $customer['reviews'] = $reviews;  
 
-    //   return Response::json( $customer);
-       return Response::json(array('success' => true ,'customer' => $customer));
-
-     }
-     catch(Exception $excep)
-     {
-      Log::debug('********  Exception occured in customer redeem  : '.$excep->getMessage().$excep->getTraceAsString().'****************');     
-         return Response::json(array('success' => false ,'msg' => $excep->getMessage()));
-
-
-     }
+       return Response::json( $customer);
                              
     }
 
@@ -331,22 +317,6 @@ class CustomerController extends Controller
 
 }
  
-private function getAcruelRatio($accruel_ratio){
 
-        switch($accruel_ratio){
-
-                case 'A' : return  A ;
-                        break ; 
-                case 'B' :   return B ;
-                          break ;
-                case 'C' : return C;
-                      break ;
-                case 'D' : return D;
-                        break;  
-                default :   return 0 ;
-                                       
-         }
-
-}
 
 }

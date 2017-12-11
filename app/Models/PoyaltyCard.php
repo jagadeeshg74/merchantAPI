@@ -18,7 +18,7 @@ class PoyaltyCard extends Model
 
     protected $fillable = [
         
-    ];
+    ];	
 
     public function customer() {
         return $this->belongsTo('App/Models/Customer','CM_CUST_ID');

@@ -16,11 +16,11 @@ Route::group([
 	Route::get('redeem/sendMessage','RedeemController@sendMessage' );
 	Route::post('users/authenticate','UsersController@authenticate');
 	Route::resource('redeem','RedeemController');
+	Route::resource('accrueredeem','NOMAccrueRedeemController');
 	Route::resource('customer.merchant','CustomerController');
 	Route::get('cashpoints/merchant/{id}/report/{report_type}/{report_date}','CashpointsController@getReportData');
 	Route::get('cashpoints/merchant/{id}','CashpointsController@showMerchantCashpoints');
-	
-	
+		
 	Route::resource('cashpoints/customer.merchant','CashpointsController@showCustomerCashpoints');
 
 	Route::get('generatePDF', 'CashpointsController@generatePDF'  );

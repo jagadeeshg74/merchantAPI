@@ -61,20 +61,20 @@ class RedeemController extends Controller
         //  Validate the required fields 
 
             $validator = Validator::make($request->all(), [
-            'bill_date'       => 'required|date',
-            'bill_no'         => 'required',
-            'bill_amount'     =>  'required | numeric |min:1',
-            'cust_id'         => 'required',
-            'merchant_id'     => 'required',
-            // Todo : add validation for redeem amount < bill_amount     
-
-        ]);
+                'bill_date'       =>  'required|date',
+                'bill_no'         =>  'required',
+                'bill_amount'     =>  'required | numeric |min:1',
+                'cust_id'         =>  'required',
+                'merchant_id'     =>  'required',
+                // Todo : add validation for redeem amount < bill_amount 
+            ]);
 
 
         $Customer = DB::table('pty_cust_master')
                            ->where( 'pty_cust_master.cm_cust_id', '=', $cust_id)
                           ->select('pty_cust_master.cm_Name','pty_cust_master.cm_town','pty_cust_master.cm_address_1','pty_cust_master.cm_mobile_no','pty_cust_master.cm_email')
                            ->get()->first();
+
         $WorkingArray = json_decode(json_encode($Customer),true);
                           
         Log::info('valid Customer : ' .json_encode($Customer));
@@ -103,7 +103,7 @@ class RedeemController extends Controller
        // create notifcation array 
        $notific_list = array();  
         $n_index =0;       
-        //Get Poyalty card exists ..
+      
 
 
 
@@ -111,13 +111,13 @@ class RedeemController extends Controller
 try
         {    
       if ($validator->fails()) {
-      Log::info('Validation Errors occured '.$validator->messages());
-      throw new Exception( 'Validation Errors occured '.$validator->messages());         
-         // todo Throw validation Exception    
-      }
+                    Log::info('Validation Errors occured '.$validator->messages());
+                    throw new Exception( 'Validation Errors occured '.$validator->messages());         
+                  // todo Throw validation Exception    
+          }
 
                 
-
+        //Get Poyalty card exists ..
       // Poyalty Card XREF      
     $poyaltyCardXref = DB::table('pty_cust_poyalty_card_xref')
                         ->where('cl_cust_id',$cust_id)->get()->first();
@@ -127,9 +127,10 @@ try
                 Log::info('Poyalty Card does not exist for this customer .');
                  throw new Exception ('Poyalty Card does not exist for given Customer :'.$NotifiData ['CustomerName'].' cubrid_connect_with_url(conn_url) Customer Id '.$cust_id) ;
           }      
+        
          //  Get the poyalty card details for the customer 
 
-            $poyaltycard= PoyaltyCard::where('cp_cust_id',$cust_id)->get()->first();
+        $poyaltycard= PoyaltyCard::where('cp_cust_id',$cust_id)->get()->first();
 
                  if (is_null($poyaltycard)){
                     Log::info('Poyalty Card Header does not exist for this customer .');
@@ -159,7 +160,7 @@ try
 
          // Get poyalty merchant  header
 
-                 $merch_poyalty_hdr = MerchantPoyalty::where([
+           $merch_poyalty_hdr = MerchantPoyalty::where([
                                     ['mp_cust_id',"=", $cust_id ],
                                     ['mp_merchant_id' ,"=",$merchant_id],
                                     ['mp_record_status',"=",'A'],
@@ -220,11 +221,8 @@ try
                                     throw new Exception ('Redeem amount ..'.$redeem_amount.' ..cannot be greater than available cash points ..'.$current_balance);
                             }
                             else {
-                              //      Log::info('__________  Creating MPD Redeem Record ________Redeem amount _____'.$redeem_amount);
-                                 //    $new_balance = $current_balance - $redeem_amount ;
-
-                               //     Log::info('__________  Creating MPD Redeem Record ________New Balance _____'.$new_balance);
-                               
+                              
+                           
                                    $new_balance = $current_balance - $redeem_amount ;
                                    // generate transation id 
                                    $transactionid=$merchant_id.date("ymd").$this->getTransCounter();     
@@ -248,20 +246,14 @@ try
 
                                 // send Notification 0
                
-                        $NotifiData['TransType'] = 'Redeemed' ;
-                        $NotifiData['Cashpoints'] = $redeem_amount ;
-                        $NotifiData['BalanceCashpoints'] = $new_balance ;
-                       //  $this->sendNotifications($NotifiData); 
-                        $notific_list[ $n_index++] = $NotifiData ;
+                                $NotifiData['TransType'] = 'Redeemed' ;
+                                $NotifiData['Cashpoints'] = $redeem_amount ;
+                                $NotifiData['BalanceCashpoints'] = $new_balance ;
+                               //  $this->sendNotifications($NotifiData); 
+                                $notific_list[ $n_index++] = $NotifiData ;
 
-
-Log::info(' Redeem notifications sent .');
-//Log::info('NotifiData ----------' .json_encode($NotifiData));
-
-// Log::info('__________   MPD Redeem Record  Created ________Poyals Balance _____'.$merch_dtl_redeem['pd_poyals_balance']);
-
-                    $merch_poyalty_hdr -> mp_poyals_redeemed += ($redeem_amount);
-                    $merch_poyalty_hdr -> mp_poyals_balance   = $new_balance;
+                      $merch_poyalty_hdr -> mp_poyals_redeemed += ($redeem_amount);
+                      $merch_poyalty_hdr -> mp_poyals_balance   = $new_balance;
 
 
                             if ($final_amount > 20 ) {         // Create Accrued Record ...
@@ -305,7 +297,7 @@ Log::info(' Redeem notifications sent .');
                                     $merch_poyalty_hdr -> mp_poyals_balance   = $new_balance;
                                     $merch_poyalty_hdr -> mp_poyals_accrued  += floor($final_amount/20) ; 
 
-                                    }  //   if final amount  ....
+                              }  //   if final amount  
 
                                 }   
                                 }   ///redeem amount 
@@ -355,10 +347,10 @@ Log::info(' Redeem notifications sent .');
 
                              //       Log::info('Createc Merchant Poyalty Detail  accrued : _____' . $merch_dtl_accrued['pd_poyals_added'] .'____Balance : '.$merch_dtl_accrued['pd_poyals_balance']);
 
-                                    } 
+                                    }   //if final 
                                 }
 
-                            }//  else.........///update mechant header 
+                            } //  else.........///update mechant header 
           
                    if ($merch_poyalty_hdr -> save())
                         {
@@ -554,7 +546,7 @@ Log::info(' Redeem notifications sent .');
   }
 
 
-public function sendEmail12(){
+public function sendEmailtest(){
   // Create the Transport
 
 
